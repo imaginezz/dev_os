@@ -11,7 +11,7 @@ use dev_os::println;
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    dev_os::hlt_loop();
 }
 
 #[cfg(test)]
@@ -22,12 +22,15 @@ fn panic(info: &PanicInfo) -> ! {
 
 #[no_mangle]
 pub extern "C" fn _start() -> ! {
-    println!("Hello World{}", "!");
+    println!("Hello {}!", "dev_os");
+
+    dev_os::init();
 
     #[cfg(test)]
     test_main();
 
-    loop {}
+    println!("It did not crash!");
+    dev_os::hlt_loop();
 }
 
 #[cfg(test)]

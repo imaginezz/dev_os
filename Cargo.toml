@@ -13,6 +13,8 @@ lazy_static = {version = "1.4.0", features = ["spin_no_std"]}
 spin = "0.5.2"
 x86_64 = "0.10.2"
 uart_16550 = "0.2.5"
+pic8259_simple = "0.1.1"
+pc-keyboard = "0.5.0"
 
 [profile.dev]
 panic = "abort"
@@ -23,6 +25,11 @@ panic = "abort"
 [[test]]
 name = "should_panic"
 harness = false
+
+[[test]]
+name = "stack_overflow"
+harness = false
+
 
 [package.metadata.bootimage]
 test-args = [

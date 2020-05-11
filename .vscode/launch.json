@@ -3,12 +3,17 @@
     "configurations": [
         {
             "type": "lldb",
-            "request": "launch",
-            "name": "Launch",
-            "program": "${workspaceFolder}/target/debug/dev_os",
-            "args": [],
-            "cwd": "${workspaceFolder}",
-            "sourceLanguages": ["rust"]
+            "request": "custom",
+            "name": "lldb-debug",
+            "sourceLanguages": [
+                "rust"
+            ],
+            "targetCreateCommands": [
+                "target create ${workspaceFolder}/target/x86_64-dev-os/debug/dev_os"
+            ],
+            "processCreateCommands": [
+                "gdb-remote localhost:1234"
+            ],
         },
     ]
 }

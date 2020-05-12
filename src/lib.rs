@@ -4,17 +4,30 @@
 #![test_runner(crate::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 #![feature(abi_x86_interrupt)]
+#![feature(alloc_error_handler)]
+#![feature(const_fn)]
+#![feature(alloc_layout_extra)]
+#![feature(const_in_array_repeat_expressions)]
 
+extern crate alloc;
+
+use alloc::alloc::Layout;
 use core::panic::PanicInfo;
 
 #[cfg(test)]
 use bootloader::{entry_point, BootInfo};
 
+pub mod allocator;
 pub mod gdt;
 pub mod interrupts;
 pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
+
+#[alloc_error_handler]
+fn alloc_error_handler(layout: Layout) -> ! {
+    panic!("allocation error: {:?}", layout);
+}
 
 pub fn test_runner(tests: &[&dyn Fn()]) {
     serial_println!("Running {} tests", tests.len());

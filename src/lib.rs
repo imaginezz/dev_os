@@ -8,6 +8,7 @@
 #![feature(const_fn)]
 #![feature(alloc_layout_extra)]
 #![feature(const_in_array_repeat_expressions)]
+#![feature(wake_trait)]
 
 extern crate alloc;
 
@@ -23,6 +24,7 @@ pub mod interrupts;
 pub mod memory;
 pub mod serial;
 pub mod vga_buffer;
+pub mod task;
 
 #[alloc_error_handler]
 fn alloc_error_handler(layout: Layout) -> ! {

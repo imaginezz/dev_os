@@ -8,7 +8,9 @@ extern crate alloc;
 
 use bootloader::{entry_point, BootInfo};
 use core::panic::PanicInfo;
-use dev_os::println;
+use dev_os::task::{executer::Executer, keyboard, Task};
+use dev_os::{allocator, memory, println};
+use x86_64::VirtAddr;
 
 #[cfg(not(test))]
 #[panic_handler]
@@ -27,41 +29,36 @@ fn kernel_main(boot_info: &'static BootInfo) -> ! {
     println!("Hello {}!", "dev_os");
     dev_os::init();
 
-    use dev_os::memory;
-    use x86_64::VirtAddr;
-
     let phys_mem_offset = VirtAddr::new(boot_info.physical_memory_offset);
     let mut mapper = unsafe { memory::init(phys_mem_offset) };
     let mut frame_allocator =
         unsafe { memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
 
-    use alloc::{boxed::Box, rc::Rc, vec, vec::Vec};
-    use dev_os::allocator;
-
     allocator::init_heap(&mut mapper, &mut frame_allocator).expect("heap initialization failed");
-    let heap_value = Box::new(11);
-    println!("heap_value at {:p}", heap_value);
-
-    let mut vec = Vec::new();
-    for i in 1..500 {
-        vec.push(i);
-    }
-    println!("vec at {:p}", vec.as_slice());
-
-    let reference_counted = Rc::new(vec![1, 2, 3]);
-    let cloned_reference = reference_counted.clone();
-    println!("current reference count is {}", Rc::strong_count(&cloned_reference));
-    core::mem::drop(reference_counted);
-    println!("current reference count is {} now", Rc::strong_count(&cloned_reference));
 
     #[cfg(test)]
     test_main();
 
     println!("It did not crash!");
-    dev_os::hlt_loop();
+
+    let mut executer = Executer::new();
+    executer.spawn(Task::new(example_task()));
+    executer.spawn(Task::new(keyboard::print_keypresses()));
+    executer.run();
+
+    // dev_os::hlt_loop();
 }
 
 entry_point!(kernel_main);
+
+async fn async_number() -> u32 {
+    22
+}
+
+async fn example_task() {
+    let number = async_number().await;
+    println!("async number: {}", number);
+}
 
 #[cfg(test)]
 mod tests {
